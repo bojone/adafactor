@@ -1,5 +1,5 @@
 # AdaFactor
-AdaFactor optimizer for keras (supporting both pure keras and tf.keras).
+[AdaFactor](https://arxiv.org/abs/1804.04235) optimizer for keras (supporting both pure keras and tf.keras).
 
 ## Link
 https://kexue.fm/archives/7302
