@@ -79,6 +79,9 @@ class AdaFactorBase(keras.optimizers.Optimizer):
         shape2[indices[-2]] = 1
         return shape1, indices[-1], shape2, indices[-2]
 
+    def rms(self, x):
+        return K.sqrt(K.mean(K.square(x)))
+
     def get_config(self):
         config = {
             'learning_rate': self._learning_rate,
@@ -138,7 +141,7 @@ class AdaFactorV1(AdaFactorBase):
             u = g / K.sqrt(v_t)
             # 增量裁剪
             if self.clipping_threshold is not None:
-                u_rms = K.mean(K.square(u))
+                u_rms = self.rms(u)
                 d = self.clipping_threshold
                 u = u / K.maximum(1.0, u_rms / d)
             # 增量滑动
@@ -152,7 +155,7 @@ class AdaFactorV1(AdaFactorBase):
                 u = m_t
             # 增量调整
             if self.multiply_by_parameter_scale:
-                u = u * K.maximum(K.mean(K.square(p)), self.epsilon2)
+                u = u * K.maximum(self.rms(p), self.epsilon2)
             # 更新参数
             self.updates.append(K.update(p, p - lr * u))
 
@@ -207,7 +210,7 @@ class AdaFactorV2(AdaFactorBase):
         u = grad / K.sqrt(v_t)
         # 增量裁剪
         if self.clipping_threshold is not None:
-            u_rms = K.mean(K.square(u))
+            u_rms = self.rms(u)
             d = self.clipping_threshold
             u = u / K.maximum(1.0, u_rms / d)
         # 增量滑动
@@ -218,7 +221,7 @@ class AdaFactorV2(AdaFactorBase):
             u = K.update(m, m_t)
         # 增量调整
         if self.multiply_by_parameter_scale:
-            u = u * K.maximum(K.mean(K.square(var)), self.epsilon2)
+            u = u * K.maximum(self.rms(var), self.epsilon2)
         # 更新参数
         return K.update(var, var - lr * u)
 
